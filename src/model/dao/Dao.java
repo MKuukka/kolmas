@@ -60,16 +60,16 @@ public class Dao {
 	
 	public ArrayList<Asiakas> listaaKaikki(String hakusana){
 		ArrayList<Asiakas> asiakkaat = new ArrayList<Asiakas>();
-		sql = "SELECT * FROM asiakkaat WHERE etunimi LIKE ? or sukunimi LIKE ? or sposti LIKE ?";		
+		sql = "SELECT * FROM asiakkaat WHERE etunimi LIKE ? or sukunimi LIKE ? or puhelin LIKE ? or sposti LIKE ?";		
 		try {
 			con=yhdista();
-			if(con!=null){ //jos yhteys onnistui
+			if(con!=null){ 
 				stmtPrep = con.prepareStatement(sql);  
 				stmtPrep.setString(1, "%" + hakusana + "%");
 				stmtPrep.setString(2, "%" + hakusana + "%");   
 				stmtPrep.setString(3, "%" + hakusana + "%");   
         		rs = stmtPrep.executeQuery();   
-				if(rs!=null){ //jos kysely onnistui							
+				if(rs!=null){ 							
 					while(rs.next()){
 						Asiakas asiakas = new Asiakas();
 						asiakas.setAsiakas_id(rs.getInt(1));
@@ -120,6 +120,48 @@ public class Dao {
 		}				
 		return paluuArvo;
 	}	
+	public Asiakas etsiAsiakas(String etunimi) {
+		Asiakas asiakas = null;
+		sql = "SELECT * FROM asiakkaat WHERE etunimi=?";       
+		try {
+			con=yhdista();
+			if(con!=null){ 
+				stmtPrep = con.prepareStatement(sql); 
+				stmtPrep.setString(1, etunimi);
+        		rs = stmtPrep.executeQuery();  
+        		if(rs.isBeforeFirst()){ 
+        			rs.next();
+        			asiakas = new Asiakas();        			
+        			asiakas.setEtunimi(rs.getString(1));
+					asiakas.setSukunimi(rs.getString(2));
+					asiakas.setPuhelin(rs.getString(3));	
+					asiakas.setSposti(rs.getString(4));       			      			
+				}        		
+			}	
+			con.close();  
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		return asiakas;		
+	}
+	
+	public boolean muutaAsiakas(Asiakas asiakas, String etunimi){
+		boolean paluuArvo=true;
+		sql="UPDATE asiakkaat SET etunimi=?, sukunimi=?, puhelin=?, sposti=? WHERE etunimi=?";						  
+		try {
+			con = yhdista();
+			stmtPrep=con.prepareStatement(sql); 
+			stmtPrep.setString(1, asiakas.getEtunimi());
+			stmtPrep.setString(2, asiakas.getSukunimi());
+			stmtPrep.setString(3, asiakas.getPuhelin());
+			stmtPrep.setString(4, asiakas.getSposti());
+			stmtPrep.executeUpdate();
+	        con.close();
+		} catch (Exception e) {				
+			e.printStackTrace();
+			paluuArvo=false;
+		}				
+		return paluuArvo;
+	}
 }
-
 
